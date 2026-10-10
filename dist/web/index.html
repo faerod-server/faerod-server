@@ -1,0 +1,479 @@
+﻿<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0b0e12">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FAEROD">
+<title>FAEROD</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+:root { --acc: #f5a623; --acc2: #ffcf6e; --bg: #0b0e12; --panel: rgba(16,20,26,.92); --edge: rgba(255,255,255,.1); --text: #eef2f6; --muted: #9aa6b2; --t: #f0b44a; --ct: #6fb6ff; --ok: #4cd964; --bad: #ff4d4d; }
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; }
+#game { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+.hidden { display: none !important; }
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+input, select { font: inherit; }
+h1, h2, h3 { margin: 0; }
+
+/* ---------- screens ---------- */
+.screen { position: fixed; inset: 0; z-index: 20; display: flex; align-items: center; justify-content: center; padding: max(14px, env(safe-area-inset-top)) max(14px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(14px, env(safe-area-inset-left)); overflow: auto; }
+.bg { background: radial-gradient(ellipse at 70% 20%, rgba(245,166,35,.16), transparent 55%), radial-gradient(ellipse at 10% 90%, rgba(80,140,255,.12), transparent 60%), linear-gradient(160deg, #10151c, #07090c 70%); }
+.bg::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px); background-size: 46px 46px; pointer-events: none; }
+.skyline { position: absolute; left: 0; right: 0; bottom: 0; height: 34vh; opacity: .55; pointer-events: none; background: linear-gradient(to top, #050608, transparent); }
+.skyline svg { position: absolute; bottom: 0; width: 100%; height: 100%; }
+.panel { position: relative; background: var(--panel); border: 1px solid var(--edge); border-radius: 14px; padding: 20px; box-shadow: 0 20px 60px rgba(0,0,0,.5); max-width: 100%; }
+.logo { font-weight: 900; letter-spacing: .16em; font-size: clamp(42px, 9vw, 84px); line-height: 1; display: flex; align-items: center; gap: .18em; text-shadow: 0 6px 30px rgba(0,0,0,.6); }
+.logo span { color: var(--acc); }
+.logo .xh { width: .8em; height: .8em; border: .08em solid var(--acc); border-radius: 50%; position: relative; }
+.logo .xh::before, .logo .xh::after { content: ""; position: absolute; background: var(--acc); }
+.logo .xh::before { left: 50%; top: -25%; width: .08em; height: 150%; transform: translateX(-50%); }
+.logo .xh::after { top: 50%; left: -25%; height: .08em; width: 150%; transform: translateY(-50%); }
+.tagline { color: var(--muted); margin: 8px 0 22px; font-size: 15px; letter-spacing: .04em; }
+.main-wrap { position: relative; display: flex; gap: 26px; align-items: center; flex-wrap: wrap; justify-content: center; width: min(980px, 100%); }
+.menu-col { display: flex; flex-direction: column; gap: 10px; min-width: 270px; }
+.btn { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 18px; border-radius: 10px; background: rgba(255,255,255,.07); border: 1px solid var(--edge); font-weight: 700; font-size: 16px; transition: background .15s, transform .05s; }
+.btn:hover { background: rgba(255,255,255,.13); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: linear-gradient(#ffb941, #e08a00); color: #1a1000; border-color: #b36d00; }
+.btn.big { font-size: 19px; padding: 16px 22px; }
+.btn.small { padding: 8px 12px; font-size: 14px; }
+.btn.danger { background: rgba(255,77,77,.18); border-color: rgba(255,77,77,.4); }
+.btn.wa { background: #25d366; color: #062b14; border-color: #1da851; }
+.btn[disabled] { opacity: .45; pointer-events: none; }
+.namebox { display: flex; align-items: center; gap: 8px; background: rgba(0,0,0,.35); border: 1px solid var(--edge); border-radius: 10px; padding: 8px 10px; }
+.namebox input { flex: 1; min-width: 0; background: transparent; border: 0; color: var(--text); font-weight: 700; font-size: 16px; outline: none; }
+.status { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.status i { width: 9px; height: 9px; border-radius: 50%; background: #777; display: inline-block; }
+.status.online i { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.status.offline i { background: var(--bad); }
+.langsw { display: flex; gap: 4px; }
+.langsw button { padding: 5px 10px; border-radius: 6px; border: 1px solid var(--edge); font-size: 13px; font-weight: 700; }
+.langsw button.on { background: var(--acc); color: #1a1000; }
+.topbar { position: absolute; top: max(12px, env(safe-area-inset-top)); right: max(14px, env(safe-area-inset-right)); display: flex; gap: 12px; align-items: center; z-index: 2; }
+.ad-strip { margin-top: 14px; font-size: 13px; color: var(--muted); text-align: center; }
+.ad-strip b { color: var(--acc); }
+
+.form { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px 16px; }
+.field { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--muted); }
+.field input[type=text], .field input[type=password], .field input[type=number], .field select { background: #0d1117; color: var(--text); border: 1px solid #2a323c; border-radius: 8px; padding: 10px; font-size: 15px; outline: none; }
+.field input:focus, .field select:focus { border-color: var(--acc); }
+.field.check { flex-direction: row; align-items: center; gap: 10px; color: var(--text); font-size: 14px; }
+.field.check input { width: 20px; height: 20px; accent-color: var(--acc); }
+.range { display: flex; align-items: center; gap: 10px; color: var(--text); }
+.range input { flex: 1; accent-color: var(--acc); }
+.range b { min-width: 34px; text-align: right; }
+.wide { width: min(980px, 100%); max-height: calc(100vh - 28px); overflow-y: auto; overflow-x: hidden; }
+.head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.head h2 { font-size: 22px; }
+.actions { display: flex; gap: 10px; justify-content: flex-end; align-items: center; margin-top: 16px; flex-wrap: wrap; }
+.mapchip { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.mapchip select { min-width: 0; } .mapchip .btn { white-space: nowrap; }
+.mapchip select { flex: 1; }
+details { margin-top: 12px; border-top: 1px solid var(--edge); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 700; margin-bottom: 10px; }
+
+.rooms { display: flex; flex-direction: column; gap: 8px; }
+.room { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 10px; background: rgba(255,255,255,.05); border: 1px solid var(--edge); }
+.room b { font-size: 16px; } .room small { color: var(--muted); display: block; margin-top: 2px; }
+.room .cnt { font-weight: 700; } .empty { color: var(--muted); text-align: center; padding: 30px; }
+
+.lobby { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.lobby .col { background: rgba(255,255,255,.04); border: 1px solid var(--edge); border-radius: 10px; padding: 12px; min-height: 120px; }
+.lobby .col h3 { font-size: 15px; margin-bottom: 8px; display: flex; justify-content: space-between; }
+.col.t h3 { color: var(--t); } .col.ct h3 { color: var(--ct); }
+.pl { display: flex; align-items: center; justify-content: space-between; padding: 7px 8px; border-radius: 6px; background: rgba(0,0,0,.25); margin-bottom: 5px; font-size: 14px; }
+.pl .tag { font-size: 11px; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,.12); margin-left: 6px; }
+.pl .tag.host { background: var(--acc); color: #1a1000; }
+.pl.me { outline: 1px solid var(--acc); }
+.codebig { font-size: 30px; font-weight: 900; letter-spacing: .2em; color: var(--acc); }
+.summary { color: var(--muted); font-size: 14px; margin-top: 4px; }
+.lobbychat { margin-top: 12px; }
+.lobbychat .log { height: 110px; overflow: auto; background: rgba(0,0,0,.3); border-radius: 8px; padding: 8px; font-size: 13px; }
+.row { display: flex; gap: 8px; margin-top: 8px; }
+.row input { flex: 1; background: #0d1117; color: var(--text); border: 1px solid #2a323c; border-radius: 8px; padding: 9px; }
+
+.modal { position: fixed; inset: 0; z-index: 40; background: rgba(0,0,0,.55); display: flex; align-items: center; justify-content: center; padding: 14px; }
+.modal .panel { width: min(520px, 100%); max-height: calc(100vh - 28px); overflow: auto; }
+.invite-link { background: #0d1117; border: 1px dashed var(--acc); border-radius: 8px; padding: 10px; font-size: 14px; word-break: break-all; user-select: text; -webkit-user-select: text; margin: 10px 0; }
+.stack { display: flex; flex-direction: column; gap: 9px; }
+#toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%); z-index: 60; background: rgba(10,12,16,.92); border: 1px solid var(--edge); padding: 10px 16px; border-radius: 10px; font-weight: 600; opacity: 0; transition: opacity .25s; pointer-events: none; }
+#toast.on { opacity: 1; }
+
+#loading { z-index: 30; flex-direction: column; gap: 18px; }
+.bar { width: min(460px, 80vw); height: 10px; border-radius: 6px; background: rgba(255,255,255,.1); overflow: hidden; }
+.bar div { height: 100%; width: 0; background: linear-gradient(90deg, var(--acc), var(--acc2)); transition: width .2s; }
+#loadtext { color: var(--muted); }
+.tip { max-width: 560px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.5; }
+
+/* map picker */
+#mappick .panel { width: min(1100px, 100%); height: calc(100vh - 28px); display: flex; flex-direction: column; }
+#mapcanvas { flex: 1; min-height: 200px; width: 100%; border-radius: 8px; background: #000; touch-action: none; cursor: crosshair; }
+.mp-bar { display: flex; gap: 10px; align-items: center; margin-top: 10px; flex-wrap: wrap; }
+.mp-bar .info { flex: 1; min-width: 180px; font-size: 14px; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; z-index: 10; pointer-events: none; font-weight: 700; text-shadow: 0 1px 3px rgba(0,0,0,.8); }
+#hud button { pointer-events: auto; }
+#crosshair { --gap: 4px; --cc: #33ff66; position: absolute; left: 50%; top: 50%; width: 0; height: 0; }
+#crosshair i { position: absolute; background: var(--cc); box-shadow: 0 0 2px #000; }
+#crosshair i:nth-child(1) { width: 2px; height: 9px; left: -1px; bottom: var(--gap); }
+#crosshair i:nth-child(2) { width: 2px; height: 9px; left: -1px; top: var(--gap); }
+#crosshair i:nth-child(3) { height: 2px; width: 9px; top: -1px; right: var(--gap); }
+#crosshair i:nth-child(4) { height: 2px; width: 9px; top: -1px; left: var(--gap); }
+#crosshair i:nth-child(5) { width: 2px; height: 2px; left: -1px; top: -1px; }
+#hitmarker { position: absolute; left: 50%; top: 50%; width: 26px; height: 26px; transform: translate(-50%,-50%) rotate(45deg); opacity: 0; }
+#hitmarker::before, #hitmarker::after { content: ""; position: absolute; background: #fff; left: 50%; top: 50%; }
+#hitmarker::before { width: 2px; height: 26px; transform: translate(-50%,-50%); background: linear-gradient(#fff 35%, transparent 35% 65%, #fff 65%); }
+#hitmarker::after { height: 2px; width: 26px; transform: translate(-50%,-50%); background: linear-gradient(90deg, #fff 35%, transparent 35% 65%, #fff 65%); }
+#hitmarker.on { animation: hm .25s ease-out; }
+#hitmarker.head::before, #hitmarker.head::after { filter: drop-shadow(0 0 2px red) hue-rotate(0deg); }
+#hitmarker.head::before { background: linear-gradient(#ff4040 35%, transparent 35% 65%, #ff4040 65%); }
+#hitmarker.head::after { background: linear-gradient(90deg, #ff4040 35%, transparent 35% 65%, #ff4040 65%); }
+@keyframes hm { from { opacity: 1; transform: translate(-50%,-50%) rotate(45deg) scale(1.3); } to { opacity: 0; transform: translate(-50%,-50%) rotate(45deg) scale(1); } }
+#vitals { position: absolute; left: max(16px, env(safe-area-inset-left)); bottom: max(14px, env(safe-area-inset-bottom)); display: flex; gap: 16px; font-size: 30px; }
+#vitals > div { display: flex; align-items: center; gap: 7px; background: rgba(0,0,0,.35); padding: 4px 12px; border-radius: 8px; }
+#vitals .ic { font-size: 18px; color: var(--muted); }
+#vitals.low #hp b { color: var(--bad); animation: blink 1s infinite; }
+#vitals i { font-style: normal; font-size: 16px; }
+@keyframes blink { 50% { opacity: .4; } }
+#ammobox { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: max(14px, env(safe-area-inset-bottom)); text-align: right; }
+#ammo { font-size: 34px; } #ammo span { font-size: 18px; color: var(--muted); margin-left: 6px; }
+#wname { font-size: 13px; color: var(--muted); }
+#money { position: absolute; left: max(16px, env(safe-area-inset-left)); bottom: 62px; font-size: 22px; color: #7dff8a; }
+#topcenter { position: absolute; top: max(8px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); text-align: center; }
+#score { display: flex; gap: 6px; justify-content: center; font-size: 20px; }
+#score span { min-width: 40px; padding: 2px 10px; border-radius: 6px; background: rgba(0,0,0,.45); }
+#score .t { color: var(--t); } #score .ct { color: var(--ct); } #score .ffa { color: var(--acc2); }
+#timer { font-size: 26px; background: rgba(0,0,0,.45); padding: 1px 14px; border-radius: 8px; margin: 3px auto 0; display: inline-block; }
+#timer.bomb { color: var(--bad); animation: blink .8s infinite; }
+#alive { font-size: 12px; color: var(--muted); margin-top: 3px; } #alive .t { color: var(--t); } #alive .ct { color: var(--ct); }
+#radar { position: absolute; left: max(10px, env(safe-area-inset-left)); top: max(10px, env(safe-area-inset-top)); width: 170px; height: 170px; }
+#killfeed { position: absolute; right: max(12px, env(safe-area-inset-right)); top: max(10px, env(safe-area-inset-top)); display: flex; flex-direction: column; gap: 4px; align-items: flex-end; font-size: 14px; }
+.kf { background: rgba(0,0,0,.55); padding: 4px 10px; border-radius: 6px; } .kf.mine { border: 1px solid #ff4d4d; }
+.kf .t, .cl .t, .t { color: var(--t); } .kf .ct, .cl .ct, .ct { color: var(--ct); } .kf i { color: #ddd; font-style: normal; font-weight: 500; margin: 0 4px; }
+#centermsg { position: absolute; left: 50%; top: 24%; transform: translateX(-50%); text-align: center; font-size: 26px; opacity: 0; transition: opacity .2s; white-space: nowrap; }
+#centermsg.on { opacity: 1; } #centermsg small { display: block; font-size: 15px; color: #ddd; margin-top: 4px; }
+#centermsg.big { font-size: 38px; } #centermsg.warn { color: #ffd166; } #centermsg.kill { color: #ff6b6b; font-size: 22px; top: 60%; }
+#hint { position: absolute; left: 50%; bottom: 120px; transform: translateX(-50%); font-size: 15px; color: #ffe08a; }
+#progress { position: absolute; left: 50%; top: 62%; transform: translateX(-50%); width: 260px; height: 10px; border-radius: 6px; background: rgba(0,0,0,.6); border: 1px solid rgba(255,255,255,.3); overflow: hidden; }
+#progress-fill { height: 100%; width: 0; background: var(--acc); }
+#chatlog { position: absolute; left: max(14px, env(safe-area-inset-left)); bottom: 120px; width: min(420px, 50vw); font-size: 14px; font-weight: 500; display: flex; flex-direction: column; gap: 2px; }
+.cl { background: rgba(0,0,0,.35); padding: 2px 8px; border-radius: 4px; transition: opacity 1s; } .cl.old { opacity: 0; } .cl.dead { color: #aaa; }
+#slots { position: absolute; right: max(18px, env(safe-area-inset-right)); bottom: 90px; display: flex; flex-direction: column; gap: 4px; align-items: flex-end; }
+.slot { font-size: 13px; padding: 4px 10px; border-radius: 6px; background: rgba(0,0,0,.35); color: #ccc; }
+.slot.sel { color: #fff; background: rgba(245,166,35,.45); }
+#fps { position: absolute; left: 190px; top: 12px; font-size: 12px; color: #9f9; }
+#deathinfo { position: absolute; left: 50%; bottom: 26%; transform: translateX(-50%); text-align: center; font-size: 20px; background: rgba(0,0,0,.5); padding: 10px 18px; border-radius: 10px; }
+#deathinfo small { font-size: 14px; color: #ccc; }
+#scope { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(circle at 50% 50%, transparent 0 38vmin, #000 38.3vmin); }
+#scope::before, #scope::after { content: ""; position: absolute; background: #000; }
+#scope::before { left: 50%; top: 0; bottom: 0; width: 2px; transform: translateX(-50%); }
+#scope::after { top: 50%; left: 0; right: 0; height: 2px; transform: translateY(-50%); }
+#flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 12; }
+#damage { position: fixed; inset: 0; pointer-events: none; box-shadow: inset 0 0 160px rgba(255,0,0,.85); opacity: 0; z-index: 11; }
+#dmgdirs .dmgdir { position: absolute; left: 50%; top: 50%; width: 220px; height: 220px; border-radius: 50%; border-top: 6px solid rgba(255,40,40,.85); animation: fade 1.2s forwards; }
+@keyframes fade { to { opacity: 0; } }
+#buymenu, #scoreboard { position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); z-index: 15; pointer-events: auto; background: rgba(12,15,20,.94); border: 1px solid var(--edge); border-radius: 12px; padding: 16px; width: min(900px, 96vw); max-height: 88vh; overflow: auto; font-weight: 500; text-shadow: none; }
+.bm-head { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; } .bm-head h2 { flex: 1; font-size: 20px; } .bm-head .money { color: #7dff8a; font-size: 20px; }
+.bm-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.bm-cat h3 { font-size: 14px; color: var(--muted); margin-bottom: 6px; }
+.bm-item { display: flex; justify-content: space-between; width: 100%; padding: 10px 12px; margin-bottom: 6px; border-radius: 8px; background: rgba(255,255,255,.06); border: 1px solid var(--edge); font-weight: 600; }
+.bm-item i { color: #7dff8a; font-style: normal; } .bm-item.poor { opacity: .45; } .bm-item.owned { border-color: var(--acc); }
+.close { font-size: 26px; line-height: 1; padding: 0 8px; }
+.sb-title { font-weight: 700; margin-bottom: 8px; color: var(--muted); }
+table.sb { width: 100%; border-collapse: collapse; margin-bottom: 14px; font-size: 14px; }
+table.sb th { text-align: left; padding: 6px; border-bottom: 2px solid; } table.sb.t th { border-color: var(--t); color: var(--t); } table.sb.ct th { border-color: var(--ct); color: var(--ct); }
+table.sb td { padding: 5px 6px; border-bottom: 1px solid rgba(255,255,255,.06); } table.sb th:not(:first-child), table.sb td:not(:first-child) { text-align: center; width: 60px; }
+table.sb tr.me td { background: rgba(245,166,35,.15); } table.sb tr.deadrow td { opacity: .5; }
+
+/* touch controls */
+#touch-area { position: fixed; inset: 0; z-index: 9; touch-action: none; }
+.tbtn { position: absolute; border-radius: 50%; background: rgba(0,0,0,.32); border: 2px solid rgba(255,255,255,.35); color: #fff; font-weight: 800; font-size: 12px; display: grid; place-items: center; pointer-events: auto; text-shadow: none; }
+.tbtn.down { background: rgba(255,255,255,.3); }
+.tbtn.fire { width: 92px; height: 92px; right: max(26px, env(safe-area-inset-right)); bottom: 118px; background: rgba(200,40,40,.35); border-color: rgba(255,120,120,.7); font-size: 15px; }
+#btn-fire2 { width: 64px; height: 64px; left: max(28px, env(safe-area-inset-left)); top: 40%; right: auto; bottom: auto; font-size: 12px; }
+#btn-jump { width: 62px; height: 62px; right: max(132px, calc(env(safe-area-inset-right) + 110px)); bottom: 40px; }
+#btn-crouch { width: 56px; height: 56px; right: max(204px, calc(env(safe-area-inset-right) + 182px)); bottom: 30px; }
+#btn-reload { width: 54px; height: 54px; right: max(132px, calc(env(safe-area-inset-right) + 110px)); bottom: 118px; }
+#btn-scope { width: 54px; height: 54px; right: max(132px, calc(env(safe-area-inset-right) + 110px)); bottom: 186px; }
+#btn-use { width: 62px; height: 62px; right: max(30px, env(safe-area-inset-right)); bottom: 230px; background: rgba(245,166,35,.4); }
+#btn-buy { width: 54px; height: 54px; left: 190px; top: 12px; border-radius: 10px; }
+#btn-score { width: 46px; height: 46px; left: 190px; top: 74px; border-radius: 10px; font-size: 16px; }
+#btn-menu { width: 44px; height: 44px; right: max(12px, env(safe-area-inset-right)); top: 96px; border-radius: 10px; font-size: 18px; }
+#joy-base { position: fixed; width: 120px; height: 120px; margin: -60px 0 0 -60px; border-radius: 50%; border: 2px solid rgba(255,255,255,.35); background: rgba(0,0,0,.2); display: none; z-index: 10; pointer-events: none; }
+#joy-base.on { display: block; }
+#joy-knob { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; border-radius: 50%; background: rgba(255,255,255,.45); transform: translate(-50%,-50%); }
+body:not(.touch) .touch-only { display: none !important; }
+body.touch #slots { bottom: 40px; top: auto; right: auto; left: 50%; transform: translateX(-50%); flex-direction: row; align-items: flex-end; pointer-events: auto; gap: 6px; }
+body.touch #slots .slot { padding: 8px 11px; font-size: 12px; }
+body.touch #ammobox { bottom: 4px; right: 50%; transform: translateX(50%); text-align: center; display: flex; gap: 8px; align-items: baseline; }
+body.touch #ammo { font-size: 22px; }
+body.touch #vitals { font-size: 19px; bottom: 6px; left: max(10px, env(safe-area-inset-left)); gap: 8px; }
+body.touch #vitals > div { padding: 2px 8px; }
+body.touch #money { bottom: auto; top: 146px; left: max(14px, env(safe-area-inset-left)); font-size: 16px; }
+body.touch #radar { width: 130px; height: 130px; }
+body.touch #btn-buy, body.touch #btn-score { left: 146px; }
+body.touch #btn-fire2 { top: 44%; left: max(22px, env(safe-area-inset-left)); }
+body.touch #chatlog { bottom: auto; top: 128px; left: 50%; transform: translateX(-50%); width: min(380px, 46vw); font-size: 12px; }
+body.touch #hint { bottom: 86px; font-size: 13px; }
+body.touch #killfeed { font-size: 12px; }
+body.touch #centermsg { font-size: 20px; } body.touch #centermsg.big { font-size: 28px; }
+body.touch #crosshair i:nth-child(1), body.touch #crosshair i:nth-child(2) { height: 7px; }
+#rotate { position: fixed; inset: 0; z-index: 70; background: #07090c; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 14px; font-size: 18px; text-align: center; padding: 20px; }
+@media (orientation: portrait) and (max-width: 900px) { body.ingame.touch #rotate { display: flex; } }
+@media (max-width: 720px) { .lobby { grid-template-columns: 1fr; } .logo { font-size: 46px; } .menu-col { min-width: 240px; } }
+@media (max-height: 460px) { .tagline { margin-bottom: 10px; } .btn.big { padding: 11px 16px; font-size: 16px; } .btn { padding: 10px 14px; } }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- ============ MAIN MENU ============ -->
+<div id="s-main" class="screen bg hidden">
+  <div class="skyline"><svg viewBox="0 0 1200 300" preserveAspectRatio="none"><path fill="#0e1218" d="M0 300V190h40v-40h30v60h25v-90h50v70h20v-120h45v140h30v-60h40v80h25V80h60v130h20v-70h35v90h30v-50h40v70h25v-100h55v120h30v-40h35v-60h30v100h40V120h50v90h25v-70h40v110h30v-80h45v60h30v-130h55v150h25v-50h40v70h30v-90h40v100h30v-40h45v300z"/><rect x="980" y="40" width="10" height="160" fill="#0e1218"/><circle cx="985" cy="35" r="9" fill="#0e1218"/></svg></div>
+  <div class="topbar">
+    <div class="status" id="netstatus"><i></i><span data-i18n="connecting"></span></div>
+    <div class="langsw"><button data-lang="tr">TR</button><button data-lang="en">EN</button></div>
+  </div>
+  <div class="main-wrap">
+    <div>
+      <div class="logo">FAE<span>ROD</span><div class="xh"></div></div>
+      <div class="tagline" data-i18n="tagline"></div>
+      <div class="namebox"><span>👤</span><input id="name-input" maxlength="20" data-i18n-ph="playerName"><button class="btn small" id="name-save" data-i18n="save"></button></div>
+      <div class="ad-strip"><b>www.faerod.com</b> · Android · iOS · Windows</div>
+    </div>
+    <div class="menu-col">
+      <button class="btn primary big" id="m-create" data-i18n="play"></button>
+      <button class="btn big" id="m-find" data-i18n="find"></button>
+      <button class="btn big" id="m-code" data-i18n="joinCode"></button>
+      <button class="btn" id="m-settings" data-i18n="settings"></button>
+      <button class="btn" id="m-howto" data-i18n="howto"></button>
+      <button class="btn hidden" id="m-quit" data-i18n="quit"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ CREATE ============ -->
+<div id="s-create" class="screen bg hidden">
+  <div class="panel wide">
+    <div class="head"><h2 id="create-title" data-i18n="createTitle"></h2><button class="btn small" data-back data-i18n="back"></button></div>
+    <div class="form">
+      <label class="field"><span data-i18n="roomName"></span><input type="text" id="f-name" maxlength="32"></label>
+      <label class="field"><span data-i18n="mode"></span><select id="f-mode"></select></label>
+      <label class="field"><span data-i18n="map"></span><div class="mapchip"><select id="f-map"></select><button class="btn small" id="f-pick" data-i18n="pickOnMap"></button></div></label>
+      <label class="field"><span data-i18n="mapSize"></span><select id="f-size"><option value="small" data-i18n="small"></option><option value="medium" data-i18n="medium"></option><option value="large" data-i18n="large"></option></select></label>
+      <label class="field"><span data-i18n="maxPlayers"></span><div class="range"><input type="range" id="f-max" min="2" max="16"><b id="f-max-v"></b></div></label>
+      <label class="field"><span data-i18n="password"></span><input type="text" id="f-pw" maxlength="24" autocomplete="off"></label>
+      <label class="field"><span data-i18n="bots"></span><div class="range"><input type="range" id="f-bots" min="0" max="14"><b id="f-bots-v"></b></div></label>
+      <label class="field"><span data-i18n="botLevel"></span><select id="f-botlevel"><option value="easy" data-i18n="easy"></option><option value="normal" data-i18n="normal"></option><option value="hard" data-i18n="hard"></option></select></label>
+      <label class="field check"><input type="checkbox" id="f-public"><span data-i18n="publicRoom"></span></label>
+      <label class="field check"><input type="checkbox" id="f-ff"><span data-i18n="friendlyFire"></span></label>
+    </div>
+    <details>
+      <summary data-i18n="advanced"></summary>
+      <div class="form">
+        <label class="field mode-bomb"><span data-i18n="rounds"></span><select id="f-rounds"><option>8</option><option>12</option><option>16</option><option>24</option><option>30</option></select></label>
+        <label class="field mode-bomb"><span data-i18n="roundTime"></span><input type="number" id="f-roundtime" min="60" max="300" step="5"></label>
+        <label class="field mode-bomb"><span data-i18n="freezeTime"></span><input type="number" id="f-freeze" min="0" max="20"></label>
+        <label class="field mode-bomb"><span data-i18n="buyTime"></span><input type="number" id="f-buytime" min="5" max="60"></label>
+        <label class="field mode-bomb"><span data-i18n="bombTime"></span><input type="number" id="f-bombtime" min="25" max="60"></label>
+        <label class="field mode-bomb"><span data-i18n="startMoney"></span><select id="f-money"><option>800</option><option>1600</option><option>2400</option><option>4000</option><option>8000</option><option>16000</option></select></label>
+        <label class="field mode-dm"><span data-i18n="timeLimit"></span><input type="number" id="f-timelimit" min="3" max="30"></label>
+        <label class="field mode-dm"><span data-i18n="killLimit"></span><input type="number" id="f-killlimit" min="10" max="200" step="5"></label>
+        <label class="field"><span data-i18n="timeOfDay"></span><select id="f-tod"><option value="day" data-i18n="day"></option><option value="evening" data-i18n="evening"></option><option value="night" data-i18n="night"></option></select></label>
+        <label class="field"><span data-i18n="weather"></span><select id="f-weather"><option value="clear" data-i18n="clear"></option><option value="cloudy" data-i18n="cloudy"></option><option value="fog" data-i18n="fog"></option></select></label>
+        <label class="field check"><input type="checkbox" id="f-balance"><span data-i18n="autoBalance"></span></label>
+      </div>
+    </details>
+    <div class="actions"><button class="btn" data-back data-i18n="cancel"></button><button class="btn primary big" id="f-submit" data-i18n="create"></button></div>
+  </div>
+</div>
+
+<!-- ============ FIND ============ -->
+<div id="s-find" class="screen bg hidden">
+  <div class="panel wide">
+    <div class="head"><h2 data-i18n="findTitle"></h2><div style="display:flex;gap:8px"><button class="btn small" id="find-refresh" data-i18n="refresh"></button><button class="btn small" data-back data-i18n="back"></button></div></div>
+    <div class="rooms" id="room-list"></div>
+  </div>
+</div>
+
+<!-- ============ JOIN BY CODE ============ -->
+<div id="s-code" class="screen bg hidden">
+  <div class="panel" style="width:min(420px,100%)">
+    <div class="head"><h2 data-i18n="codeTitle"></h2><button class="btn small" data-back data-i18n="back"></button></div>
+    <div class="stack">
+      <label class="field"><span data-i18n="roomCode"></span><input type="text" id="code-input" maxlength="5" style="text-transform:uppercase;font-size:26px;letter-spacing:.3em;text-align:center"></label>
+      <label class="field"><span data-i18n="enterPassword"></span><input type="text" id="code-pw" maxlength="24" autocomplete="off"></label>
+      <button class="btn primary big" id="code-join" data-i18n="joinNow"></button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ LOBBY ============ -->
+<div id="s-lobby" class="screen bg hidden">
+  <div class="panel wide">
+    <div class="head">
+      <div><h2 id="lobby-name"></h2><div class="summary" id="lobby-summary"></div></div>
+      <div style="text-align:right"><div class="summary" data-i18n="code"></div><div class="codebig" id="lobby-code"></div></div>
+    </div>
+    <div class="actions" style="justify-content:flex-start;margin:0 0 12px">
+      <button class="btn primary" id="lobby-invite" data-i18n="invite"></button>
+      <button class="btn small" id="lobby-team-t"></button>
+      <button class="btn small" id="lobby-team-ct"></button>
+      <button class="btn small" id="lobby-team-spec" data-i18n="spectate"></button>
+      <span style="flex:1"></span>
+      <span class="host-only"><button class="btn small" id="lobby-botm" data-i18n="removeBot"></button> <button class="btn small" id="lobby-botp" data-i18n="addBot"></button> <button class="btn small" id="lobby-edit" data-i18n="editSettings"></button></span>
+    </div>
+    <div class="lobby" id="lobby-teams"></div>
+    <div class="lobbychat"><div class="log" id="lobby-log"></div><div class="row"><input id="lobby-chat-in" maxlength="120" data-i18n-ph="chat"><button class="btn small" id="lobby-chat-send" data-i18n="send"></button></div></div>
+    <div class="actions"><button class="btn danger" id="lobby-leave" data-i18n="leave"></button><span id="lobby-wait" class="summary" data-i18n="waitingHost" style="align-self:center"></span><button class="btn primary big host-only" id="lobby-start" data-i18n="start"></button></div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS ============ -->
+<div id="s-settings" class="screen bg hidden">
+  <div class="panel wide" style="width:min(640px,100%)">
+    <div class="head"><h2 data-i18n="settings"></h2><button class="btn small" data-back data-i18n="back"></button></div>
+    <div class="form" style="grid-template-columns:1fr">
+      <label class="field"><span data-i18n="language"></span><select id="o-lang"><option value="tr">Türkçe</option><option value="en">English</option></select></label>
+      <label class="field"><span data-i18n="graphics"></span><select id="o-quality"><option value="auto">Auto</option><option value="low" data-i18n="low"></option><option value="medium" data-i18n="medium"></option><option value="high" data-i18n="high"></option><option value="ultra" data-i18n="ultra"></option></select></label>
+      <label class="field"><span data-i18n="sensitivity"></span><div class="range"><input type="range" id="o-sens" min="0.2" max="3" step="0.05"><b id="o-sens-v"></b></div></label>
+      <label class="field"><span data-i18n="touchSens"></span><div class="range"><input type="range" id="o-tsens" min="0.3" max="3" step="0.05"><b id="o-tsens-v"></b></div></label>
+      <label class="field"><span data-i18n="fov"></span><div class="range"><input type="range" id="o-fov" min="65" max="105" step="1"><b id="o-fov-v"></b></div></label>
+      <label class="field"><span data-i18n="volume"></span><div class="range"><input type="range" id="o-vol" min="0" max="1" step="0.05"><b id="o-vol-v"></b></div></label>
+      <label class="field"><span data-i18n="crosshairColor"></span><select id="o-cross"><option value="#33ff66">Yeşil / Green</option><option value="#00e5ff">Camgöbeği / Cyan</option><option value="#ffffff">Beyaz / White</option><option value="#ff3355">Kırmızı / Red</option><option value="#ffe14d">Sarı / Yellow</option></select></label>
+      <label class="field check"><input type="checkbox" id="o-fps"><span data-i18n="showFps"></span></label>
+      <label class="field check"><input type="checkbox" id="o-voice"><span data-i18n="voice"></span></label>
+      <label class="field check"><input type="checkbox" id="o-invert"><span data-i18n="invertY"></span></label>
+      <label class="field"><span data-i18n="serverAddr"></span><input type="text" id="o-server" placeholder="oyun.faerod.com"></label>
+    </div>
+    <div class="actions"><button class="btn primary" id="o-save" data-i18n="save"></button></div>
+  </div>
+</div>
+
+<!-- ============ HOW TO ============ -->
+<div id="s-howto" class="screen bg hidden">
+  <div class="panel wide" style="width:min(720px,100%)">
+    <div class="head"><h2 data-i18n="howto"></h2><button class="btn small" data-back data-i18n="back"></button></div>
+    <p class="tip" style="text-align:left" data-i18n="tutorial"></p>
+    <p class="tip" style="text-align:left" data-i18n="ctrlDesktop"></p>
+    <p class="tip" style="text-align:left" data-i18n="ctrlMobile"></p>
+  </div>
+</div>
+
+<!-- ============ MAP PICKER ============ -->
+<div id="mappick" class="modal hidden">
+  <div class="panel">
+    <div class="head"><h2 data-i18n="mapPickTitle"></h2><button class="btn small" id="mp-close" data-i18n="close"></button></div>
+    <canvas id="mapcanvas"></canvas>
+    <div class="mp-bar"><div class="info" id="mp-info" data-i18n="mapPickHint"></div><button class="btn" id="mp-zoomout">−</button><button class="btn" id="mp-zoomin">+</button><button class="btn primary" id="mp-ok" data-i18n="choose"></button></div>
+  </div>
+</div>
+
+<!-- ============ MODALS ============ -->
+<div id="m-invite" class="modal hidden"><div class="panel">
+  <div class="head"><h2 data-i18n="inviteTitle"></h2><button class="btn small" data-close data-i18n="close"></button></div>
+  <p class="tip" style="text-align:left;margin:0" data-i18n="inviteInfo"></p>
+  <div class="invite-link" id="inv-link"></div>
+  <label class="field check" id="inv-pw-row"><input type="checkbox" id="inv-pw" checked><span data-i18n="includePw"></span></label>
+  <div class="stack" style="margin-top:10px">
+    <button class="btn wa big" id="inv-wa" data-i18n="whatsapp"></button>
+    <button class="btn" id="inv-mail" data-i18n="email"></button>
+    <button class="btn" id="inv-share" data-i18n="share"></button>
+    <button class="btn" id="inv-copy" data-i18n="copy"></button>
+  </div>
+</div></div>
+
+<div id="m-pause" class="modal hidden"><div class="panel" style="width:min(380px,100%)">
+  <div class="head"><h2 data-i18n="options"></h2></div>
+  <div class="stack">
+    <button class="btn primary" id="p-resume" data-i18n="resume"></button>
+    <button class="btn" id="p-team" data-i18n="changeTeam"></button>
+    <button class="btn" id="p-invite" data-i18n="invite"></button>
+    <button class="btn" id="p-settings" data-i18n="settings"></button>
+    <button class="btn host-only" id="p-lobby" data-i18n="returnLobby"></button>
+    <button class="btn danger" id="p-leave" data-i18n="leave"></button>
+  </div>
+</div></div>
+
+<div id="m-team" class="modal hidden"><div class="panel" style="width:min(420px,100%)">
+  <div class="head"><h2 data-i18n="teamSelect"></h2><button class="btn small" data-close data-i18n="close"></button></div>
+  <div class="stack">
+    <button class="btn big" id="tm-t" style="color:var(--t)"></button>
+    <button class="btn big" id="tm-ct" style="color:var(--ct)"></button>
+    <button class="btn" id="tm-auto" data-i18n="autoTeam"></button>
+    <button class="btn" id="tm-spec" data-i18n="spectate"></button>
+  </div>
+</div></div>
+
+<div id="m-chat" class="modal hidden" style="align-items:flex-end;background:transparent"><div class="panel" style="width:min(520px,100%);margin-bottom:12vh">
+  <div class="row" style="margin:0"><input id="chat-in" maxlength="120" data-i18n-ph="chat"><button class="btn small" id="chat-send" data-i18n="send"></button></div>
+</div></div>
+
+<div id="m-end" class="modal hidden"><div class="panel" style="width:min(720px,100%)">
+  <div class="head"><h2 data-i18n="matchOver"></h2></div>
+  <div id="end-body"></div>
+  <div class="actions"><button class="btn danger" id="end-menu" data-i18n="backToMenu"></button><button class="btn primary" id="end-lobby" data-i18n="returnLobby"></button></div>
+</div></div>
+
+<div id="m-alert" class="modal hidden"><div class="panel" style="width:min(400px,100%)">
+  <p id="alert-text" style="font-size:16px;margin:0 0 14px"></p>
+  <div class="stack" id="alert-extra"></div>
+  <div class="actions"><button class="btn primary" data-close data-i18n="ok"></button></div>
+</div></div>
+
+<div id="loading" class="screen bg hidden">
+  <div class="logo" style="font-size:52px">FAE<span>ROD</span></div>
+  <div class="bar"><div id="loadbar"></div></div>
+  <div id="loadtext"></div>
+  <div class="tip" id="loadtip"></div>
+</div>
+
+<!-- ============ HUD ============ -->
+<div id="hud" class="hidden">
+  <canvas id="radar" width="340" height="340"></canvas>
+  <div id="fps"></div>
+  <div id="topcenter"><div id="score"></div><div id="timer"></div><div id="alive"></div></div>
+  <div id="killfeed"></div>
+  <div id="crosshair"><i></i><i></i><i></i><i></i><i></i></div>
+  <div id="hitmarker"></div>
+  <div id="dmgdirs"></div>
+  <div id="centermsg"></div>
+  <div id="hint"></div>
+  <div id="progress" class="hidden"><div id="progress-fill"></div></div>
+  <div id="chatlog"></div>
+  <div id="money"></div>
+  <div id="vitals"><div id="hpbox"><span class="ic">✚</span><span id="hp"></span></div><div><span class="ic">⛨</span><span id="ar"></span></div></div>
+  <div id="ammobox"><div id="ammo"></div><div id="wname"></div></div>
+  <div id="slots"></div>
+  <div id="deathinfo" class="hidden"></div>
+  <div id="buymenu" class="hidden"></div>
+  <div id="scoreboard" class="hidden"></div>
+  <button class="tbtn fire touch-only" id="btn-fire">ATEŞ</button>
+  <button class="tbtn fire touch-only" id="btn-fire2">ATEŞ</button>
+  <button class="tbtn touch-only" id="btn-jump">⤒</button>
+  <button class="tbtn touch-only" id="btn-crouch">⤓</button>
+  <button class="tbtn touch-only" id="btn-reload">R</button>
+  <button class="tbtn touch-only" id="btn-scope">⌖</button>
+  <button class="tbtn touch-only hidden" id="btn-use">E</button>
+  <button class="tbtn touch-only" id="btn-buy">$</button>
+  <button class="tbtn touch-only" id="btn-score">☰</button>
+  <button class="tbtn touch-only" id="btn-menu">⏸</button>
+</div>
+<div id="touch-area" class="hidden"></div>
+<div id="joy-base"><div id="joy-knob"></div></div>
+<div id="scope" class="hidden"></div>
+<div id="flash"></div>
+<div id="damage"></div>
+<div id="rotate"><div style="font-size:54px">⟳</div><div>Lütfen cihazınızı yatay çevirin<br><small>Please rotate your device</small></div></div>
+<div id="toast"></div>
+<script src="faerod.js"></script>
+</body>
+</html>

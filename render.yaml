@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: faerod
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
