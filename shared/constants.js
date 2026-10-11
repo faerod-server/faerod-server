@@ -1,4 +1,4 @@
-// Shared game constants and room settings schema.
+﻿// Shared game constants and room settings schema.
 export const VERSION = 1;
 export const TICK_RATE = 30;          // server simulation Hz
 export const SNAPSHOT_RATE = 20;      // server -> client state Hz
@@ -43,8 +43,8 @@ export const SETTINGS_SCHEMA = {
   maxPlayers: { type: 'int', def: 10, min: 2, max: 16 },
   password: { type: 'string', def: '', max: 24 },
   isPublic: { type: 'bool', def: true },
-  mapX: { type: 'num', def: 0, min: -9800, max: 9800 },
-  mapZ: { type: 'num', def: 0, min: -9800, max: 9800 },
+  mapX: { type: 'num', def: 0, min: -900, max: 900 },
+  mapZ: { type: 'num', def: 0, min: -900, max: 900 },
   mapName: { type: 'string', def: 'Özlüce', max: 40 },
   mapSize: { type: 'enum', def: 'medium', values: ['small', 'medium', 'large'] },
   maxRounds: { type: 'enum', def: 16, values: [8, 12, 16, 24, 30] },
